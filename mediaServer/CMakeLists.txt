@@ -1,15 +1,15 @@
-cmake_minimum_required(VERSION 3.10)
-project(BasicUsageEnvironment)
+ï»¿cmake_minimum_required(VERSION 3.10)
+project(mediaServer)
 
-# ÉèÖÃÍ·ÎÄ¼şËÑË÷Â·¾¶
+# è®¾ç½® include ç›®å½•
 include_directories(
-    include
     ../UsageEnvironment/include
     ../groupsock/include
+    ../liveMedia/include
+    ../BasicUsageEnvironment/include
     /usr/local/include
 )
-
-# ÉèÖÃ±àÒëÑ¡Ïî
+# è®¾ç½®ç¼–è¯‘é€‰é¡¹
 add_definitions(
     -DSOCKLEN_T=socklen_t
     -D_LARGEFILE_SOURCE=1
@@ -21,27 +21,24 @@ add_definitions(
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall")
 
-# ¶¨ÒåÔ´ÎÄ¼ş
+# å®šä¹‰æºæ–‡ä»¶
 set(SOURCES
-    BasicUsageEnvironment0.cpp
-    BasicUsageEnvironment.cpp
-    BasicTaskScheduler0.cpp
-    BasicTaskScheduler.cpp
-    DelayQueue.cpp
-    BasicHashTable.cpp
+    live555MediaServer.cpp
+    DynamicRTSPServer.cpp
 )
 
-# ¹¹½¨¾²Ì¬¿â
-add_library(BasicUsageEnvironment STATIC ${SOURCES})
+# è®¾ç½®ä¾èµ–åº“è·¯å¾„
+link_directories(${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
 
-# ÉèÖÃ°²×°Â·¾¶Ç°×º£¨¿ÉÍ¨¹ı cmake -DCMAKE_INSTALL_PREFIX=/your/path ÉèÖÃ£©
-#set(INSTALL_INCLUDE_DIR include/BasicUsageEnvironment)
-#set(INSTALL_LIB_DIR lib)
 
-# °²×°Í·ÎÄ¼ş
-#install(DIRECTORY include/ DESTINATION ${INSTALL_INCLUDE_DIR}
-#        FILES_MATCHING PATTERN "*.hh")
+add_executable(mediaServer ${SOURCES})
 
-# °²×°¾²Ì¬¿â
-#install(TARGETS BasicUsageEnvironment
-#       ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
+target_link_libraries(mediaServer 
+    liveMedia
+    groupsock
+    BasicUsageEnvironment
+    UsageEnvironment
+    ssl
+    crypto
+)
+

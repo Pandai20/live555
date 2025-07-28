@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.10)
+ï»¿cmake_minimum_required(VERSION 3.10)
 project(live555ProxyServer)
 
-# ÉèÖÃ¿ÉÖ´ĞĞÎÄ¼şÃû
+# è®¾ç½®å¯æ‰§è¡Œæ–‡ä»¶å
 set(PROXY_SERVER live555ProxyServer)
 
-# ÉèÖÃ include Ä¿Â¼
+# è®¾ç½® include ç›®å½•
 include_directories(
     ../UsageEnvironment/include
     ../groupsock/include
@@ -13,7 +13,7 @@ include_directories(
     /usr/local/include
 )
 
-# ÉèÖÃ±àÒëÑ¡Ïî
+# è®¾ç½®ç¼–è¯‘é€‰é¡¹
 add_compile_definitions(
     SOCKLEN_T=socklen_t
     _LARGEFILE_SOURCE=1
@@ -23,16 +23,13 @@ add_compile_definitions(
 )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O2")
-# ÉèÖÃ¶ş½øÖÆÎÄ¼şÊä³öÄ¿Â¼
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
-message(STATUS "this is CMAKE_RUNTIME_OUTPUT_DIRECTORY dir " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-# ÉèÖÃÔ´ÂëÎÄ¼ş
+# è®¾ç½®æºç æ–‡ä»¶
 set(SOURCES
     live555ProxyServer.cpp
 )
 
-# ÉèÖÃÒÀÀµ¿âÂ·¾¶
+# è®¾ç½®ä¾èµ–åº“è·¯å¾„
 link_directories(
     ../UsageEnvironment
     ../groupsock
@@ -41,7 +38,7 @@ link_directories(
     .
 )
 
-# Ìí¼Ó¿ÉÖ´ĞĞÎÄ¼ş
+# æ·»åŠ å¯æ‰§è¡Œæ–‡ä»¶
 add_executable(${PROXY_SERVER} ${SOURCES})
 
 
@@ -53,6 +50,6 @@ target_link_libraries(${PROXY_SERVER}
     ssl
     crypto
 )
-
-# °²×°ÉèÖÃ
+message(STATUS "11111111111" ${PROXY_SERVER})
+# å®‰è£…è®¾ç½®
 #install(TARGETS ${PROXY_SERVER} DESTINATION bin)
