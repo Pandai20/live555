@@ -1,1 +1,25 @@
 .DS_Store
+
+# 忽略 VS 工程生成文件
+.vs/
+.vscode/
+*.suo
+*.user
+*.VC.db
+*.VC.VC.opendb
+
+# 忽略构建输出文件夹
+bin/
+out/
+build/
+**/out/
+**/bin/
+/BasicUsageEnvironment/Makefile
+/groupsock/Makefile
+/hlsProxy/Makefile
+/liveMedia/Makefile
+/mediaServer/Makefile
+/proxyServer/Makefile
+/testProgs/Makefile
+/UsageEnvironment/Makefile
+/Makefile
