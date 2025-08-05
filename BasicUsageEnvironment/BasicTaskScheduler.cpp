@@ -1,4 +1,4 @@
-/**********
+﻿/**********
 This library is free software; you can redistribute it and/or modify it under
 the terms of the GNU Lesser General Public License as published by the
 Free Software Foundation; either version 3 of the License, or (at your
@@ -29,41 +29,42 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 ////////// BasicTaskScheduler //////////
 
 BasicTaskScheduler* BasicTaskScheduler::createNew(unsigned maxSchedulerGranularity) {
-	return new BasicTaskScheduler(maxSchedulerGranularity);
+    return new BasicTaskScheduler(maxSchedulerGranularity);
 }
 
 BasicTaskScheduler::BasicTaskScheduler(unsigned maxSchedulerGranularity)
-  : fMaxSchedulerGranularity(maxSchedulerGranularity), fMaxNumSockets(0)
+    : fMaxSchedulerGranularity(maxSchedulerGranularity), fMaxNumSockets(0)
 #if defined(__WIN32__) || defined(_WIN32)
-  , fDummySocketNum(-1)
+    , fDummySocketNum(-1)
 #endif
 {
-  FD_ZERO(&fReadSet);
-  FD_ZERO(&fWriteSet);
-  FD_ZERO(&fExceptionSet);
+    FD_ZERO(&fReadSet);
+    FD_ZERO(&fWriteSet);
+    FD_ZERO(&fExceptionSet);
 
-  if (maxSchedulerGranularity > 0) schedulerTickTask(); // ensures that we handle events frequently
+    if (maxSchedulerGranularity > 0) schedulerTickTask(); // ensures that we handle events frequently
 }
 
 BasicTaskScheduler::~BasicTaskScheduler() {
 #if defined(__WIN32__) || defined(_WIN32)
-  if (fDummySocketNum >= 0) closeSocket(fDummySocketNum);
+    if (fDummySocketNum >= 0) closeSocket(fDummySocketNum);
 #endif
 }
 
 void BasicTaskScheduler::schedulerTickTask(void* clientData) {
-  ((BasicTaskScheduler*)clientData)->schedulerTickTask();
+    ((BasicTaskScheduler*)clientData)->schedulerTickTask();
 }
 
 void BasicTaskScheduler::schedulerTickTask() {
-  scheduleDelayedTask(fMaxSchedulerGranularity, schedulerTickTask, this);
+    scheduleDelayedTask(fMaxSchedulerGranularity, schedulerTickTask, this);
 }
 
 #ifndef MILLION
 #define MILLION 1000000
 #endif
 
-void BasicTaskScheduler::SingleStep(unsigned maxDelayTime) {
+void BasicTaskScheduler::SingleStep(unsigned maxDelayTime)
+{
     fd_set readSet = fReadSet; // make a copy for this select() call
     fd_set writeSet = fWriteSet; // ditto
     fd_set exceptionSet = fExceptionSet; // ditto
@@ -210,44 +211,47 @@ void BasicTaskScheduler::SingleStep(unsigned maxDelayTime) {
 }
 
 void BasicTaskScheduler
-  ::setBackgroundHandling(int socketNum, int conditionSet, BackgroundHandlerProc* handlerProc, void* clientData) {
-  if (socketNum < 0) return;
+::setBackgroundHandling(int socketNum, int conditionSet, BackgroundHandlerProc * handlerProc, void* clientData)
+{
+    if (socketNum < 0)
+        return;
 #if !defined(__WIN32__) && !defined(_WIN32) && defined(FD_SETSIZE)
-  if (socketNum >= (int)(FD_SETSIZE)) return;
+    if (socketNum >= (int)(FD_SETSIZE)) return;
 #endif
-  FD_CLR((unsigned)socketNum, &fReadSet);
-  FD_CLR((unsigned)socketNum, &fWriteSet);
-  FD_CLR((unsigned)socketNum, &fExceptionSet);
-  if (conditionSet == 0) {
-    fHandlers->clearHandler(socketNum);
-    if (socketNum+1 == fMaxNumSockets) {
-      --fMaxNumSockets;
+    FD_CLR((unsigned)socketNum, &fReadSet);
+    FD_CLR((unsigned)socketNum, &fWriteSet);
+    FD_CLR((unsigned)socketNum, &fExceptionSet);
+    if (conditionSet == 0) {
+        fHandlers->clearHandler(socketNum);
+        if (socketNum + 1 == fMaxNumSockets) {
+            --fMaxNumSockets;
+        }
     }
-  } else {
-    fHandlers->assignHandler(socketNum, conditionSet, handlerProc, clientData);
-    if (socketNum+1 > fMaxNumSockets) {
-      fMaxNumSockets = socketNum+1;
+    else {
+        fHandlers->assignHandler(socketNum, conditionSet, handlerProc, clientData);
+        if (socketNum + 1 > fMaxNumSockets) {
+            fMaxNumSockets = socketNum + 1;
+        }
+        if (conditionSet & SOCKET_READABLE) FD_SET((unsigned)socketNum, &fReadSet);
+        if (conditionSet & SOCKET_WRITABLE) FD_SET((unsigned)socketNum, &fWriteSet);
+        if (conditionSet & SOCKET_EXCEPTION) FD_SET((unsigned)socketNum, &fExceptionSet);
     }
-    if (conditionSet&SOCKET_READABLE) FD_SET((unsigned)socketNum, &fReadSet);
-    if (conditionSet&SOCKET_WRITABLE) FD_SET((unsigned)socketNum, &fWriteSet);
-    if (conditionSet&SOCKET_EXCEPTION) FD_SET((unsigned)socketNum, &fExceptionSet);
-  }
 }
 
 void BasicTaskScheduler::moveSocketHandling(int oldSocketNum, int newSocketNum) {
-  if (oldSocketNum < 0 || newSocketNum < 0) return; // sanity check
+    if (oldSocketNum < 0 || newSocketNum < 0) return; // sanity check
 #if !defined(__WIN32__) && !defined(_WIN32) && defined(FD_SETSIZE)
-  if (oldSocketNum >= (int)(FD_SETSIZE) || newSocketNum >= (int)(FD_SETSIZE)) return; // sanity check
+    if (oldSocketNum >= (int)(FD_SETSIZE) || newSocketNum >= (int)(FD_SETSIZE)) return; // sanity check
 #endif
-  if (FD_ISSET(oldSocketNum, &fReadSet)) {FD_CLR((unsigned)oldSocketNum, &fReadSet); FD_SET((unsigned)newSocketNum, &fReadSet);}
-  if (FD_ISSET(oldSocketNum, &fWriteSet)) {FD_CLR((unsigned)oldSocketNum, &fWriteSet); FD_SET((unsigned)newSocketNum, &fWriteSet);}
-  if (FD_ISSET(oldSocketNum, &fExceptionSet)) {FD_CLR((unsigned)oldSocketNum, &fExceptionSet); FD_SET((unsigned)newSocketNum, &fExceptionSet);}
-  fHandlers->moveHandler(oldSocketNum, newSocketNum);
+    if (FD_ISSET(oldSocketNum, &fReadSet)) { FD_CLR((unsigned)oldSocketNum, &fReadSet); FD_SET((unsigned)newSocketNum, &fReadSet); }
+    if (FD_ISSET(oldSocketNum, &fWriteSet)) { FD_CLR((unsigned)oldSocketNum, &fWriteSet); FD_SET((unsigned)newSocketNum, &fWriteSet); }
+    if (FD_ISSET(oldSocketNum, &fExceptionSet)) { FD_CLR((unsigned)oldSocketNum, &fExceptionSet); FD_SET((unsigned)newSocketNum, &fExceptionSet); }
+    fHandlers->moveHandler(oldSocketNum, newSocketNum);
 
-  if (oldSocketNum+1 == fMaxNumSockets) {
-    --fMaxNumSockets;
-  }
-  if (newSocketNum+1 > fMaxNumSockets) {
-    fMaxNumSockets = newSocketNum+1;
-  }
+    if (oldSocketNum + 1 == fMaxNumSockets) {
+        --fMaxNumSockets;
+    }
+    if (newSocketNum + 1 > fMaxNumSockets) {
+        fMaxNumSockets = newSocketNum + 1;
+    }
 }

@@ -30,7 +30,8 @@ HashTable::Iterator::Iterator() {
 
 HashTable::Iterator::~Iterator() {}
 
-void* HashTable::RemoveNext() {
+void* HashTable::RemoveNext() 
+{
   Iterator* iter = Iterator::create(*this);
   char const* key;
   void* removedValue = iter->next(key);

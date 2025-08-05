@@ -32,12 +32,13 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #define REBUILD_MULTIPLIER 3
 
 BasicHashTable::BasicHashTable(int keyType)
-  : fBuckets(fStaticBuckets), fNumBuckets(SMALL_HASH_TABLE_SIZE),
-    fNumEntries(0), fRebuildSize(SMALL_HASH_TABLE_SIZE*REBUILD_MULTIPLIER),
-    fDownShift(28), fMask(0x3), fKeyType(keyType) {
-  for (unsigned i = 0; i < SMALL_HASH_TABLE_SIZE; ++i) {
-    fStaticBuckets[i] = NULL;
-  }
+    : fBuckets(fStaticBuckets), fNumBuckets(SMALL_HASH_TABLE_SIZE),
+    fNumEntries(0), fRebuildSize(SMALL_HASH_TABLE_SIZE* REBUILD_MULTIPLIER),
+    fDownShift(28), fMask(0x3), fKeyType(keyType)
+{
+    for (unsigned i = 0; i < SMALL_HASH_TABLE_SIZE; ++i) {
+        fStaticBuckets[i] = NULL;
+    }
 }
 
 BasicHashTable::~BasicHashTable() {
@@ -53,24 +54,26 @@ BasicHashTable::~BasicHashTable() {
   if (fBuckets != fStaticBuckets) delete[] fBuckets;
 }
 
-void* BasicHashTable::Add(char const* key, void* value) {
-  void* oldValue;
-  unsigned index;
-  TableEntry* entry = lookupKey(key, index);
-  if (entry != NULL) {
-    // There's already an item with this key
-    oldValue = entry->value;
-  } else {
-    // There's no existing entry; create a new one:
-    entry = insertNewEntry(index, key);
-    oldValue = NULL;
-  }
-  entry->value = value;
+void* BasicHashTable::Add(char const* key, void* value)
+{
+    void* oldValue;
+    unsigned index;
+    TableEntry* entry = lookupKey(key, index);
+    if (entry != NULL) {
+        // There's already an item with this key
+        oldValue = entry->value;
+    }
+    else {
+        // There's no existing entry; create a new one:
+        entry = insertNewEntry(index, key);
+        oldValue = NULL;
+    }
+    entry->value = value;
 
-  // If the table has become too large, rebuild it with more buckets:
-  if (fNumEntries >= fRebuildSize) rebuild();
+    // If the table has become too large, rebuild it with more buckets:
+    if (fNumEntries >= fRebuildSize) rebuild();
 
-  return oldValue;
+    return oldValue;
 }
 
 Boolean BasicHashTable::Remove(char const* key) {

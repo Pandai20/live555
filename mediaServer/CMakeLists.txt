@@ -17,9 +17,9 @@ add_definitions(
     -DALLOW_RTSP_SERVER_PORT_REUSE=1
     -DBSD=1
 )
-
+add_definitions(-DDEBUG)
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -Wall")
 
 # 定义源文件
 set(SOURCES

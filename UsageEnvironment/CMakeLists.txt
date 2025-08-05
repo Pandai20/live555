@@ -9,18 +9,6 @@ include_directories(
     /usr/local/include
 )
 
-# 设置编译选项
-add_definitions(
-    -DSOCKLEN_T=socklen_t
-    -D_LARGEFILE_SOURCE=1
-    -D_FILE_OFFSET_BITS=64
-    -DALLOW_RTSP_SERVER_PORT_REUSE=1
-    -DBSD=1
-)
-
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall")
-
 
 # 定义源文件
 set(SOURCES

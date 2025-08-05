@@ -33,13 +33,16 @@ int main(int argc, char** argv) {
     UsageEnvironment* env = BasicUsageEnvironment::createNew(*scheduler);
 
     UserAuthenticationDatabase* authDB = NULL;
+
+
 #ifdef ACCESS_CONTROL
+//#if 1
     // To implement client access control to the RTSP server, do the following:
     authDB = new UserAuthenticationDatabase;
     authDB->addUserRecord("username1", "password1"); // replace these with real strings
     // Repeat the above with each <username>, <password> that you wish to allow
     // access to the server.
-#endif
+#endif //ACCESS_CONTROL
 
   // Create the RTSP server.  Try first with the default port number (554),
   // and then with the alternative port number (8554):
@@ -56,6 +59,9 @@ int main(int argc, char** argv) {
     }
 
     *env << "LIVE555 Media Server\n";
+#ifdef DEBUG
+    *env << "Compile Mode : DEBUG\n";
+#endif // DEBUG
     *env << "\tversion " << MEDIA_SERVER_VERSION_STRING
         << " (LIVE555 Streaming Media library version "
         << LIVEMEDIA_LIBRARY_VERSION_STRING << ").\n";

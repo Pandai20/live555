@@ -49,169 +49,171 @@ static void decodeURL(char* url) {
 }
 
 Boolean parseRTSPRequestString(char const* reqStr, unsigned reqStrSize,
-			       char* resultCmdName,
-			       unsigned resultCmdNameMaxSize,
-			       char* resultURLPreSuffix,
-			       unsigned resultURLPreSuffixMaxSize,
-			       char* resultURLSuffix,
-			       unsigned resultURLSuffixMaxSize,
-			       char* resultCSeq,
-			       unsigned resultCSeqMaxSize,
-                               char* resultSessionIdStr,
-                               unsigned resultSessionIdStrMaxSize,
-			       unsigned& contentLength, Boolean& urlIsRTSPS) {
-  // This parser is currently rather dumb; it should be made smarter #####
-  urlIsRTSPS = False; // by default
+    char* resultCmdName,
+    unsigned resultCmdNameMaxSize,
+    char* resultURLPreSuffix,
+    unsigned resultURLPreSuffixMaxSize,
+    char* resultURLSuffix,
+    unsigned resultURLSuffixMaxSize,
+    char* resultCSeq,
+    unsigned resultCSeqMaxSize,
+    char* resultSessionIdStr,
+    unsigned resultSessionIdStrMaxSize,
+    unsigned& contentLength, Boolean& urlIsRTSPS)
+{
+    // This parser is currently rather dumb; it should be made smarter #####
+    urlIsRTSPS = False; // by default
 
-  // "Be liberal in what you accept": Skip over any whitespace at the start of the request:
-  unsigned i;
-  for (i = 0; i < reqStrSize; ++i) {
-    char c = reqStr[i];
-    if (!(c == ' ' || c == '\t' || c == '\r' || c == '\n' || c == '\0')) break;
-  }
-  if (i == reqStrSize) return False; // The request consisted of nothing but whitespace!
+    // "Be liberal in what you accept": Skip over any whitespace at the start of the request:
+    unsigned i;
+    for (i = 0; i < reqStrSize; ++i) {
+        char c = reqStr[i];
+        if (!(c == ' ' || c == '\t' || c == '\r' || c == '\n' || c == '\0')) break;
+    }
+    if (i == reqStrSize) return False; // The request consisted of nothing but whitespace!
 
-  // Then read everything up to the next space (or tab) as the command name:
-  Boolean parseSucceeded = False;
-  unsigned i1 = 0;
-  for (; i1 < resultCmdNameMaxSize-1 && i < reqStrSize; ++i,++i1) {
-    char c = reqStr[i];
-    if (c == ' ' || c == '\t') {
-      parseSucceeded = True;
-      break;
+    // Then read everything up to the next space (or tab) as the command name:
+    Boolean parseSucceeded = False;
+    unsigned i1 = 0;
+    for (; i1 < resultCmdNameMaxSize - 1 && i < reqStrSize; ++i, ++i1) {
+        char c = reqStr[i];
+        if (c == ' ' || c == '\t') {
+            parseSucceeded = True;
+            break;
+        }
+
+        resultCmdName[i1] = c;
+    }
+    resultCmdName[i1] = '\0';
+    if (!parseSucceeded) return False;
+
+    // Skip over the prefix of any "rtsp://" or "rtsp:/" (or "rtsps://" or "rtsps:/")
+    // URL that follows:
+    unsigned j = i + 1;
+    while (j < reqStrSize && (reqStr[j] == ' ' || reqStr[j] == '\t')) ++j; // skip over any additional white space
+    for (; (int)j < (int)(reqStrSize - 8); ++j) {
+        if ((reqStr[j] == 'r' || reqStr[j] == 'R')
+            && (reqStr[j + 1] == 't' || reqStr[j + 1] == 'T')
+            && (reqStr[j + 2] == 's' || reqStr[j + 2] == 'S')
+            && (reqStr[j + 3] == 'p' || reqStr[j + 3] == 'P')) {
+            if (reqStr[j + 4] == 's' || reqStr[j + 4] == 'S') {
+                urlIsRTSPS = True;
+                ++j;
+            }
+            if (reqStr[j + 4] == ':' && reqStr[j + 5] == '/') {
+                j += 6;
+                if (reqStr[j] == '/') {
+                    // This is a "rtsp(s)://" URL; skip over the host:port part that follows:
+                    ++j;
+                    while (j < reqStrSize && reqStr[j] != '/' && reqStr[j] != ' ') ++j;
+                }
+                else {
+                    // This is a "rtsp(s):/" URL; back up to the "/":
+                    --j;
+                }
+                i = j;
+                break;
+            }
+        }
     }
 
-    resultCmdName[i1] = c;
-  }
-  resultCmdName[i1] = '\0';
-  if (!parseSucceeded) return False;
+    // Look for the URL suffix (before the following "RTSP/"):
+    parseSucceeded = False;
+    for (unsigned k = i + 1; (int)k < (int)(reqStrSize - 5); ++k) {
+        if (reqStr[k] == 'R' && reqStr[k + 1] == 'T' &&
+            reqStr[k + 2] == 'S' && reqStr[k + 3] == 'P' && reqStr[k + 4] == '/') {
+            while (--k >= i && reqStr[k] == ' ') {} // go back over all spaces before "RTSP/"
+            unsigned k1 = k;
+            while (k1 > i && reqStr[k1] != '/') --k1;
 
-  // Skip over the prefix of any "rtsp://" or "rtsp:/" (or "rtsps://" or "rtsps:/")
-  // URL that follows:
-  unsigned j = i+1;
-  while (j < reqStrSize && (reqStr[j] == ' ' || reqStr[j] == '\t')) ++j; // skip over any additional white space
-  for (; (int)j < (int)(reqStrSize-8); ++j) {
-    if ((reqStr[j] == 'r' || reqStr[j] == 'R')
-	&& (reqStr[j+1] == 't' || reqStr[j+1] == 'T')
-	&& (reqStr[j+2] == 's' || reqStr[j+2] == 'S')
-	&& (reqStr[j+3] == 'p' || reqStr[j+3] == 'P')) {
-      if (reqStr[j+4] == 's' || reqStr[j+4] == 'S') {
-	urlIsRTSPS = True;
-	++j;
-      }
-      if (reqStr[j+4] == ':' && reqStr[j+5] == '/') {
-	j += 6;
-	if (reqStr[j] == '/') {
-	  // This is a "rtsp(s)://" URL; skip over the host:port part that follows:
-	  ++j;
-	  while (j < reqStrSize && reqStr[j] != '/' && reqStr[j] != ' ') ++j;
-	} else {
-	  // This is a "rtsp(s):/" URL; back up to the "/":
-	  --j;
-	}
-	i = j;
-	break;
-      }
+            // ASSERT: At this point
+            //   i: first space or slash after "host" or "host:port"
+            //   k: last non-space before "RTSP/"
+            //   k1: last slash in the range [i,k]
+
+            // The URL suffix comes from [k1+1,k]
+            // Copy "resultURLSuffix":
+            unsigned n = 0, k2 = k1 + 1;
+            if (k2 <= k) {
+                if (k - k1 + 1 > resultURLSuffixMaxSize) return False; // there's no room
+                while (k2 <= k) resultURLSuffix[n++] = reqStr[k2++];
+            }
+            resultURLSuffix[n] = '\0';
+
+            // The URL 'pre-suffix' comes from [i+1,k1-1]
+            // Copy "resultURLPreSuffix":
+            n = 0; k2 = i + 1;
+            if (k2 + 1 <= k1) {
+                if (k1 - i > resultURLPreSuffixMaxSize) return False; // there's no room
+                while (k2 <= k1 - 1) resultURLPreSuffix[n++] = reqStr[k2++];
+            }
+            resultURLPreSuffix[n] = '\0';
+            decodeURL(resultURLPreSuffix);
+
+            i = k + 7; // to go past " RTSP/"
+            parseSucceeded = True;
+            break;
+        }
     }
-  }	
+    if (!parseSucceeded) return False;
 
-  // Look for the URL suffix (before the following "RTSP/"):
-  parseSucceeded = False;
-  for (unsigned k = i+1; (int)k < (int)(reqStrSize-5); ++k) {
-    if (reqStr[k] == 'R' && reqStr[k+1] == 'T' &&
-	reqStr[k+2] == 'S' && reqStr[k+3] == 'P' && reqStr[k+4] == '/') {
-      while (--k >= i && reqStr[k] == ' ') {} // go back over all spaces before "RTSP/"
-      unsigned k1 = k;
-      while (k1 > i && reqStr[k1] != '/') --k1;
+    // Look for "CSeq:" (mandatory, case insensitive), skip whitespace,
+    // then read everything up to the next \r or \n as 'CSeq':
+    parseSucceeded = False;
+    for (j = i; (int)j < (int)(reqStrSize - 5); ++j) {
+        if (_strncasecmp("CSeq:", &reqStr[j], 5) == 0) {
+            j += 5;
+            while (j < reqStrSize && (reqStr[j] == ' ' || reqStr[j] == '\t')) ++j;
+            unsigned n;
+            for (n = 0; n < resultCSeqMaxSize - 1 && j < reqStrSize; ++n, ++j) {
+                char c = reqStr[j];
+                if (c == '\r' || c == '\n') {
+                    parseSucceeded = True;
+                    break;
+                }
 
-      // ASSERT: At this point
-      //   i: first space or slash after "host" or "host:port"
-      //   k: last non-space before "RTSP/"
-      //   k1: last slash in the range [i,k]
-
-      // The URL suffix comes from [k1+1,k]
-      // Copy "resultURLSuffix":
-      unsigned n = 0, k2 = k1+1;
-      if (k2 <= k) {
-        if (k - k1 + 1 > resultURLSuffixMaxSize) return False; // there's no room
-        while (k2 <= k) resultURLSuffix[n++] = reqStr[k2++];
-      }
-      resultURLSuffix[n] = '\0';
-
-      // The URL 'pre-suffix' comes from [i+1,k1-1]
-      // Copy "resultURLPreSuffix":
-      n = 0; k2 = i+1;
-      if (k2+1 <= k1) {
-        if (k1 - i > resultURLPreSuffixMaxSize) return False; // there's no room
-        while (k2 <= k1-1) resultURLPreSuffix[n++] = reqStr[k2++];
-      }
-      resultURLPreSuffix[n] = '\0';
-      decodeURL(resultURLPreSuffix);
-
-      i = k + 7; // to go past " RTSP/"
-      parseSucceeded = True;
-      break;
+                resultCSeq[n] = c;
+            }
+            resultCSeq[n] = '\0';
+            break;
+        }
     }
-  }
-  if (!parseSucceeded) return False;
+    if (!parseSucceeded) return False;
 
-  // Look for "CSeq:" (mandatory, case insensitive), skip whitespace,
-  // then read everything up to the next \r or \n as 'CSeq':
-  parseSucceeded = False;
-  for (j = i; (int)j < (int)(reqStrSize-5); ++j) {
-    if (_strncasecmp("CSeq:", &reqStr[j], 5) == 0) {
-      j += 5;
-      while (j < reqStrSize && (reqStr[j] ==  ' ' || reqStr[j] == '\t')) ++j;
-      unsigned n;
-      for (n = 0; n < resultCSeqMaxSize-1 && j < reqStrSize; ++n,++j) {
-	char c = reqStr[j];
-	if (c == '\r' || c == '\n') {
-	  parseSucceeded = True;
-	  break;
-	}
+    // Look for "Session:" (optional, case insensitive), skip whitespace,
+    // then read everything up to the next \r or \n as 'Session':
+    resultSessionIdStr[0] = '\0'; // default value (empty string)
+    for (j = i; (int)j < (int)(reqStrSize - 8); ++j) {
+        if (_strncasecmp("Session:", &reqStr[j], 8) == 0) {
+            j += 8;
+            while (j < reqStrSize && (reqStr[j] == ' ' || reqStr[j] == '\t')) ++j;
+            unsigned n;
+            for (n = 0; n < resultSessionIdStrMaxSize - 1 && j < reqStrSize; ++n, ++j) {
+                char c = reqStr[j];
+                if (c == '\r' || c == '\n') {
+                    break;
+                }
 
-	resultCSeq[n] = c;
-      }
-      resultCSeq[n] = '\0';
-      break;
+                resultSessionIdStr[n] = c;
+            }
+            resultSessionIdStr[n] = '\0';
+            break;
+        }
     }
-  }
-  if (!parseSucceeded) return False;
 
-  // Look for "Session:" (optional, case insensitive), skip whitespace,
-  // then read everything up to the next \r or \n as 'Session':
-  resultSessionIdStr[0] = '\0'; // default value (empty string)
-  for (j = i; (int)j < (int)(reqStrSize-8); ++j) {
-    if (_strncasecmp("Session:", &reqStr[j], 8) == 0) {
-      j += 8;
-      while (j < reqStrSize && (reqStr[j] ==  ' ' || reqStr[j] == '\t')) ++j;
-      unsigned n;
-      for (n = 0; n < resultSessionIdStrMaxSize-1 && j < reqStrSize; ++n,++j) {
-	char c = reqStr[j];
-	if (c == '\r' || c == '\n') {
-	  break;
-	}
-
-	resultSessionIdStr[n] = c;
-      }
-      resultSessionIdStr[n] = '\0';
-      break;
+    // Also: Look for "Content-Length:" (optional, case insensitive)
+    contentLength = 0; // default value
+    for (j = i; (int)j < (int)(reqStrSize - 15); ++j) {
+        if (_strncasecmp("Content-Length:", &(reqStr[j]), 15) == 0) {
+            j += 15;
+            while (j < reqStrSize && (reqStr[j] == ' ' || reqStr[j] == '\t')) ++j;
+            unsigned num;
+            if (sscanf(&reqStr[j], "%u", &num) == 1) {
+                contentLength = num;
+            }
+        }
     }
-  }
-
-  // Also: Look for "Content-Length:" (optional, case insensitive)
-  contentLength = 0; // default value
-  for (j = i; (int)j < (int)(reqStrSize-15); ++j) {
-    if (_strncasecmp("Content-Length:", &(reqStr[j]), 15) == 0) {
-      j += 15;
-      while (j < reqStrSize && (reqStr[j] ==  ' ' || reqStr[j] == '\t')) ++j;
-      unsigned num;
-      if (sscanf(&reqStr[j], "%u", &num) == 1) {
-	contentLength = num;
-      }
-    }
-  }
-  return True;
+    return True;
 }
 
 Boolean parseRangeParam(char const* paramStr,
