@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.10)
+ï»¿cmake_minimum_required(VERSION 3.10)
 project(BasicUsageEnvironment)
 
-# ÉèÖÃÍ·ÎÄ¼şËÑË÷Â·¾¶
+# è®¾ç½®å¤´æ–‡ä»¶æœç´¢è·¯å¾„
 include_directories(
     include
     ../UsageEnvironment/include
@@ -9,19 +9,7 @@ include_directories(
     /usr/local/include
 )
 
-# ÉèÖÃ±àÒëÑ¡Ïî
-add_definitions(
-    -DSOCKLEN_T=socklen_t
-    -D_LARGEFILE_SOURCE=1
-    -D_FILE_OFFSET_BITS=64
-    -DALLOW_RTSP_SERVER_PORT_REUSE=1
-    -DBSD=1
-)
-
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall")
-
-# ¶¨ÒåÔ´ÎÄ¼ş
+# å®šä¹‰æºæ–‡ä»¶
 set(SOURCES
     BasicUsageEnvironment0.cpp
     BasicUsageEnvironment.cpp
@@ -31,17 +19,17 @@ set(SOURCES
     BasicHashTable.cpp
 )
 
-# ¹¹½¨¾²Ì¬¿â
+# æ„å»ºé™æ€åº“
 add_library(BasicUsageEnvironment STATIC ${SOURCES})
 
-# ÉèÖÃ°²×°Â·¾¶Ç°×º£¨¿ÉÍ¨¹ı cmake -DCMAKE_INSTALL_PREFIX=/your/path ÉèÖÃ£©
+# è®¾ç½®å®‰è£…è·¯å¾„å‰ç¼€ï¼ˆå¯é€šè¿‡ cmake -DCMAKE_INSTALL_PREFIX=/your/path è®¾ç½®ï¼‰
 #set(INSTALL_INCLUDE_DIR include/BasicUsageEnvironment)
 #set(INSTALL_LIB_DIR lib)
 
-# °²×°Í·ÎÄ¼ş
+# å®‰è£…å¤´æ–‡ä»¶
 #install(DIRECTORY include/ DESTINATION ${INSTALL_INCLUDE_DIR}
 #        FILES_MATCHING PATTERN "*.hh")
 
-# °²×°¾²Ì¬¿â
+# å®‰è£…é™æ€åº“
 #install(TARGETS BasicUsageEnvironment
 #       ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
