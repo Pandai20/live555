@@ -125,7 +125,8 @@ _Tables::~_Tables() {
 
 ////////// MediaLookupTable implementation //////////
 
-MediaLookupTable* MediaLookupTable::ourMedia(UsageEnvironment& env) {
+MediaLookupTable* MediaLookupTable::ourMedia(UsageEnvironment& env) 
+{
     _Tables* ourTables = _Tables::getOurTables(env);
     if (ourTables->mediaTable == NULL) {
         // Create a new table to record the media that are to be created in

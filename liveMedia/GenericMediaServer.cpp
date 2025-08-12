@@ -38,11 +38,11 @@ void GenericMediaServer::addServerMediaSession(ServerMediaSession* serverMediaSe
     fServerMediaSessions->Add(sessionName, (void*)serverMediaSession);
 }
 
-void GenericMediaServer
-::lookupServerMediaSession(char const* streamName,
+void GenericMediaServer::lookupServerMediaSession(char const* streamName,
     lookupServerMediaSessionCompletionFunc* completionFunc,
     void* completionClientData,
-    Boolean /*isFirstLookupInSession*/) {
+    Boolean /*isFirstLookupInSession*/)
+{
     // Default implementation: Do a synchronous lookup, and call the completion function:
     if (completionFunc != NULL) {
         (*completionFunc)(completionClientData, getServerMediaSession(streamName));
@@ -73,7 +73,8 @@ void GenericMediaServer
 }
 
 void GenericMediaServer::removeServerMediaSession(ServerMediaSession* serverMediaSession) {
-    if (serverMediaSession == NULL) return;
+    if (serverMediaSession == NULL)
+        return;
 
     fServerMediaSessions->Remove(serverMediaSession->streamName());
     if (serverMediaSession->referenceCount() == 0) {
@@ -89,7 +90,8 @@ void GenericMediaServer::removeServerMediaSession(char const* streamName) {
 }
 
 void GenericMediaServer::closeAllClientSessionsForServerMediaSession(ServerMediaSession* serverMediaSession) {
-    if (serverMediaSession == NULL) return;
+    if (serverMediaSession == NULL)
+        return;
 
     HashTable::Iterator* iter = HashTable::Iterator::create(*fClientSessions);
     GenericMediaServer::ClientSession* clientSession;
@@ -108,7 +110,8 @@ void GenericMediaServer::closeAllClientSessionsForServerMediaSession(char const*
 }
 
 void GenericMediaServer::deleteServerMediaSession(ServerMediaSession* serverMediaSession) {
-    if (serverMediaSession == NULL) return;
+    if (serverMediaSession == NULL)
+        return;
 
     closeAllClientSessionsForServerMediaSession(serverMediaSession);
     removeServerMediaSession(serverMediaSession);
@@ -193,7 +196,8 @@ int GenericMediaServer::setUpOurSocket(UsageEnvironment& env, Port& ourPort, int
 #endif
 
         ourSocket = setupStreamSocket(env, ourPort, domain, True, True);
-        if (ourSocket < 0) break;
+        if (ourSocket < 0)
+            break;
 
         // Make sure we have a big send buffer:
         if (!increaseSendBufferTo(env, ourSocket, 50 * 1024)) break;
@@ -308,7 +312,8 @@ void GenericMediaServer::ClientConnection::incomingRequestHandler(void* instance
     connection->incomingRequestHandler();
 }
 
-void GenericMediaServer::ClientConnection::incomingRequestHandler() {
+void GenericMediaServer::ClientConnection::incomingRequestHandler()
+{
     if (fInputTLS->tlsAcceptIsNeeded) { // we need to successfully call fInputTLS->accept() first:
         if (fInputTLS->accept(fOurSocket) <= 0) return; // either an error, or we need to try again later
 
@@ -369,7 +374,8 @@ void GenericMediaServer::ClientSession::noteLiveness() {
     fprintf(stderr, "Client session (id \"%08X\", stream name \"%s\"): Liveness indication\n",
         fOurSessionId, streamName);
 #endif
-    if (fOurServerMediaSession != NULL) fOurServerMediaSession->noteLiveness();
+    if (fOurServerMediaSession != NULL)
+        fOurServerMediaSession->noteLiveness();
 
     if (fOurServer.fReclamationSeconds > 0) {
         envir().taskScheduler().rescheduleDelayedTask(fLivenessCheckTask,

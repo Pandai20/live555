@@ -392,11 +392,13 @@ int setupStreamSocket(UsageEnvironment& env, Port port, int domain,
 
 int readSocket(UsageEnvironment& env,
     int socket, unsigned char* buffer, unsigned bufferSize,
-    struct sockaddr_storage& fromAddress) {
+    struct sockaddr_storage& fromAddress)
+{
     SOCKLEN_T addressSize = sizeof fromAddress;
     int bytesRead = recvfrom(socket, (char*)buffer, bufferSize, 0,
         (struct sockaddr*)&fromAddress,
         &addressSize);
+
     if (bytesRead < 0) {
         //##### HACK to work around bugs in Linux and Windows:
         int err = env.getErrno();
@@ -561,7 +563,8 @@ static void clearMulticastAllSocketOption(int socket, int domain) {
 }
 
 Boolean socketJoinGroup(UsageEnvironment& env, int socket,
-    struct sockaddr_storage const& groupAddress) {
+    struct sockaddr_storage const& groupAddress)
+{
     if (!IsMulticastAddress(groupAddress)) return True; // ignore this case
 
     int level, option_name;
@@ -816,7 +819,8 @@ static void getOurIPAddresses(UsageEnvironment& env); // forward
 static ipv4AddressBits _ourIPv4Address = 0;
 #define _weHaveAnIPv4Address (_ourIPv4Address != 0)
 
-ipv4AddressBits ourIPv4Address(UsageEnvironment& env) {
+ipv4AddressBits ourIPv4Address(UsageEnvironment& env)
+{
     if (ReceivingInterfaceAddr != INADDR_ANY) {
         // Hack: If we were told to receive on a specific interface address, then 
         // define this to be our ip address:

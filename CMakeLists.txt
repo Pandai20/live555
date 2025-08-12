@@ -20,10 +20,11 @@ add_definitions(
     #解决报错‘struct std::atomic_flag’ has no member named ‘test’
     -DNO_STD_LIB
     -DDEBUG
+    -DLOG_RTSPSERVER_ACCESS
 )
 
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -Wall -g")
 
 add_subdirectory(liveMedia)
 

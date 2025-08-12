@@ -1,4 +1,4 @@
-/**********
+﻿/**********
 This library is free software; you can redistribute it and/or modify it under
 the terms of the GNU Lesser General Public License as published by the
 Free Software Foundation; either version 3 of the License, or (at your
@@ -22,21 +22,22 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 
 H264VideoStreamFramer* H264VideoStreamFramer
 ::createNew(UsageEnvironment& env, FramedSource* inputSource,
-	    Boolean includeStartCodeInOutput, Boolean insertAccessUnitDelimiters) {
-  return new H264VideoStreamFramer(env, inputSource, True,
-				   includeStartCodeInOutput, insertAccessUnitDelimiters);
+    Boolean includeStartCodeInOutput, Boolean insertAccessUnitDelimiters)
+{
+    return new H264VideoStreamFramer(env, inputSource, True,
+        includeStartCodeInOutput, insertAccessUnitDelimiters);
 }
 
 H264VideoStreamFramer
 ::H264VideoStreamFramer(UsageEnvironment& env, FramedSource* inputSource, Boolean createParser,
-			Boolean includeStartCodeInOutput, Boolean insertAccessUnitDelimiters)
-  : H264or5VideoStreamFramer(264, env, inputSource, createParser,
-			     includeStartCodeInOutput, insertAccessUnitDelimiters) {
+    Boolean includeStartCodeInOutput, Boolean insertAccessUnitDelimiters)
+    : H264or5VideoStreamFramer(264, env, inputSource, createParser,
+        includeStartCodeInOutput, insertAccessUnitDelimiters) {
 }
 
 H264VideoStreamFramer::~H264VideoStreamFramer() {
 }
 
 Boolean H264VideoStreamFramer::isH264VideoStreamFramer() const {
-  return True;
+    return True;
 }

@@ -21,6 +21,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include "DynamicRTSPServer.hh"
 #include <liveMedia.hh>
 #include <string.h>
+#include <iostream>
 
 DynamicRTSPServer*
 DynamicRTSPServer::createNew(UsageEnvironment& env, Port ourPort,
@@ -49,8 +50,7 @@ DynamicRTSPServer::~DynamicRTSPServer() {
 static ServerMediaSession* createNewSMS(UsageEnvironment& env,
     char const* fileName, FILE* fid); // forward
 
-void DynamicRTSPServer
-::lookupServerMediaSession(char const* streamName,
+void DynamicRTSPServer::lookupServerMediaSession(char const* streamName,
     lookupServerMediaSessionCompletionFunc* completionFunc,
     void* completionClientData,
     Boolean isFirstLookupInSession)

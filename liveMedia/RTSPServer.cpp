@@ -56,9 +56,9 @@ Boolean RTSPServer::lookupByName(UsageEnvironment& env,
     return True;
 }
 
-char* RTSPServer
-::rtspURL(ServerMediaSession const* serverMediaSession,
-    int clientSocket, Boolean useIPv6) const {
+char* RTSPServer::rtspURL(ServerMediaSession const* serverMediaSession,
+    int clientSocket, Boolean useIPv6) const
+{
     char* urlPrefix = rtspURLPrefix(clientSocket, useIPv6);
     char const* sessionName = serverMediaSession->streamName();
 
@@ -69,7 +69,8 @@ char* RTSPServer
     return resultURL;
 }
 
-char* RTSPServer::rtspURLPrefix(int clientSocket, Boolean useIPv6) const {
+char* RTSPServer::rtspURLPrefix(int clientSocket, Boolean useIPv6) const
+{
     struct sockaddr_storage ourAddress;
 
     if (clientSocket < 0) {
@@ -169,7 +170,8 @@ UserAuthenticationDatabase* RTSPServer::getAuthenticationDatabaseForCommand(char
 
 Boolean RTSPServer::specialClientAccessCheck(int /*clientSocket*/,
     struct sockaddr_storage const& /*clientAddr*/,
-    char const* /*urlSuffix*/) {
+    char const* /*urlSuffix*/)
+{
     // default implementation
     return True;
 }
@@ -393,7 +395,8 @@ void RTSPServer::RTSPClientConnection
 }
 
 void RTSPServer::RTSPClientConnection
-::handleCmd_DESCRIBE(char const* urlPreSuffix, char const* urlSuffix, char const* fullRequestStr) {
+::handleCmd_DESCRIBE(char const* urlPreSuffix, char const* urlSuffix, char const* fullRequestStr)
+{
     char urlTotalSuffix[2 * RTSP_PARAM_STRING_MAX];
     // enough space for urlPreSuffix/urlSuffix'\0'
     urlTotalSuffix[0] = '\0';
@@ -419,8 +422,8 @@ void RTSPServer::RTSPClientConnection
     connection->handleCmd_DESCRIBE_afterLookup(sessionLookedUp);
 }
 
-void RTSPServer::RTSPClientConnection
-::handleCmd_DESCRIBE_afterLookup(ServerMediaSession* session) {
+void RTSPServer::RTSPClientConnection::handleCmd_DESCRIBE_afterLookup(ServerMediaSession* session)
+{
     char* sdpDescription = NULL;
     char* rtspURL = NULL;
     do {
@@ -508,7 +511,8 @@ void RTSPServer::RTSPClientConnection::handleCmd_notSupported() {
         fCurrentCSeq, dateHeader(), fOurRTSPServer.allowedCommandNames());
 }
 
-void RTSPServer::RTSPClientConnection::handleCmd_redirect(char const* urlSuffix) {
+void RTSPServer::RTSPClientConnection::handleCmd_redirect(char const* urlSuffix)
+{
     char* urlPrefix = fOurRTSPServer.rtspURLPrefix(fClientInputSocket);
     snprintf((char*)fResponseBuffer, sizeof fResponseBuffer,
         "RTSP/1.0 301 Moved Permanently\r\n"
@@ -1125,7 +1129,8 @@ static Boolean parseAuthorizationHeader(char const* buf,
 }
 
 Boolean RTSPServer::RTSPClientConnection
-::authenticationOK(char const* cmdName, char const* urlSuffix, char const* fullRequestStr) {
+::authenticationOK(char const* cmdName, char const* urlSuffix, char const* fullRequestStr)
+{
     if (!fOurRTSPServer.specialClientAccessCheck(fClientInputSocket, fClientAddr, urlSuffix)) {
         setRTSPResponse("401 Unauthorized");
         return False;
@@ -1481,7 +1486,8 @@ void RTSPServer::RTSPClientSession
 }
 
 void RTSPServer::RTSPClientSession
-::handleCmd_SETUP_afterLookup2(ServerMediaSession* sms) {
+::handleCmd_SETUP_afterLookup2(ServerMediaSession* sms)
+{
     do {
         if (sms == NULL) {
             if (fOurServerMediaSession == NULL) {
@@ -1539,7 +1545,8 @@ void RTSPServer::RTSPClientSession
         if (fTrackId != NULL && fTrackId[0] != '\0') { // normal case
             for (trackNum = 0; trackNum < fNumStreamStates; ++trackNum) {
                 subsession = fStreamStates[trackNum].subsession;
-                if (subsession != NULL && strcmp(fTrackId, subsession->trackId()) == 0) break;
+                if (subsession != NULL && strcmp(fTrackId, subsession->trackId()) == 0)
+                    break;
             }
             if (trackNum >= fNumStreamStates) {
                 // The specified track id doesn't exist, so this request fails:

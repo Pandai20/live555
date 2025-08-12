@@ -26,11 +26,14 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 class AlarmHandler : public DelayQueueEntry {
 public:
     AlarmHandler(TaskFunc* proc, void* clientData, DelayInterval timeToDelay, intptr_t token)
-        : DelayQueueEntry(timeToDelay, token), fProc(proc), fClientData(clientData) {
+        : DelayQueueEntry(timeToDelay, token)
+        , fProc(proc), fClientData(clientData) 
+    {
     }
 
 private: // redefined virtual functions
-    virtual void handleTimeout() {
+    virtual void handleTimeout() 
+    {
         (*fProc)(fClientData);
         DelayQueueEntry::handleTimeout();
     }
@@ -85,11 +88,23 @@ void BasicTaskScheduler0::unscheduleDelayedTask(TaskToken& prevTask) {
     delete alarmHandler;
 }
 
+#include <chrono>
+#include <iostream>
 void BasicTaskScheduler0::doEventLoop(char volatile* watchVariable) {
     // Repeatedly loop, handling readble sockets and timed events:
+    auto start = std::chrono::high_resolution_clock::now();
     while (1) {
         if (watchVariable != NULL && *watchVariable != 0) break;
         SingleStep();
+
+        //default interval time 10ms
+#if 0
+        auto end = std::chrono::high_resolution_clock::now();
+        std::cout << "Interval Time : "
+            << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
+            << std::endl;
+        start = end;
+#endif // 0
     }
 }
 
@@ -196,7 +211,8 @@ HandlerSet::~HandlerSet() {
 }
 
 void HandlerSet
-::assignHandler(int socketNum, int conditionSet, TaskScheduler::BackgroundHandlerProc* handlerProc, void* clientData) {
+::assignHandler(int socketNum, int conditionSet, TaskScheduler::BackgroundHandlerProc* handlerProc, void* clientData)
+{
     // First, see if there's already a handler for this socket:
     HandlerDescriptor* handler = lookupHandler(socketNum);
     if (handler == NULL) { // No existing handler, so create a new descr:

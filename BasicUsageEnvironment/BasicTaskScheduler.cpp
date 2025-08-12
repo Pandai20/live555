@@ -1,4 +1,5 @@
-﻿/**********
+﻿#include "BasicUsageEnvironment.hh"
+/**********
 This library is free software; you can redistribute it and/or modify it under
 the terms of the GNU Lesser General Public License as published by the
 Free Software Foundation; either version 3 of the License, or (at your
@@ -21,6 +22,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include "BasicUsageEnvironment.hh"
 #include "HandlerSet.hh"
 #include <stdio.h>
+#include <iostream>
 #if defined(_QNX4)
 #include <sys/select.h>
 #include <unix.h>
@@ -42,7 +44,8 @@ BasicTaskScheduler::BasicTaskScheduler(unsigned maxSchedulerGranularity)
     FD_ZERO(&fWriteSet);
     FD_ZERO(&fExceptionSet);
 
-    if (maxSchedulerGranularity > 0) schedulerTickTask(); // ensures that we handle events frequently
+    if (maxSchedulerGranularity > 0)
+        schedulerTickTask(); // ensures that we handle events frequently
 }
 
 BasicTaskScheduler::~BasicTaskScheduler() {
@@ -83,7 +86,8 @@ void BasicTaskScheduler::SingleStep(unsigned maxDelayTime)
     if (maxDelayTime > 0 &&
         (tv_timeToDelay.tv_sec > (long)maxDelayTime / MILLION ||
             (tv_timeToDelay.tv_sec == (long)maxDelayTime / MILLION &&
-                tv_timeToDelay.tv_usec > (long)maxDelayTime % MILLION))) {
+                tv_timeToDelay.tv_usec > (long)maxDelayTime % MILLION)))
+    {
         tv_timeToDelay.tv_sec = maxDelayTime / MILLION;
         tv_timeToDelay.tv_usec = maxDelayTime % MILLION;
     }
@@ -134,7 +138,8 @@ void BasicTaskScheduler::SingleStep(unsigned maxDelayTime)
     // socket number that we handled:
     if (fLastHandledSocketNum >= 0) {
         while ((handler = iter.next()) != NULL) {
-            if (handler->socketNum == fLastHandledSocketNum) break;
+            if (handler->socketNum == fLastHandledSocketNum)
+                break;
         }
         if (handler == NULL) {
             fLastHandledSocketNum = -1;
@@ -144,9 +149,15 @@ void BasicTaskScheduler::SingleStep(unsigned maxDelayTime)
     while ((handler = iter.next()) != NULL) {
         int sock = handler->socketNum; // alias
         int resultConditionSet = 0;
-        if (FD_ISSET(sock, &readSet) && FD_ISSET(sock, &fReadSet)/*sanity check*/) resultConditionSet |= SOCKET_READABLE;
-        if (FD_ISSET(sock, &writeSet) && FD_ISSET(sock, &fWriteSet)/*sanity check*/) resultConditionSet |= SOCKET_WRITABLE;
-        if (FD_ISSET(sock, &exceptionSet) && FD_ISSET(sock, &fExceptionSet)/*sanity check*/) resultConditionSet |= SOCKET_EXCEPTION;
+        if (FD_ISSET(sock, &readSet) && FD_ISSET(sock, &fReadSet)/*sanity check*/)
+            resultConditionSet |= SOCKET_READABLE;
+
+        if (FD_ISSET(sock, &writeSet) && FD_ISSET(sock, &fWriteSet)/*sanity check*/)
+            resultConditionSet |= SOCKET_WRITABLE;
+
+        if (FD_ISSET(sock, &exceptionSet) && FD_ISSET(sock, &fExceptionSet)/*sanity check*/)
+            resultConditionSet |= SOCKET_EXCEPTION;
+
         if ((resultConditionSet & handler->conditionSet) != 0 && handler->handlerProc != NULL) {
             fLastHandledSocketNum = sock;
             // Note: we set "fLastHandledSocketNum" before calling the handler,
@@ -162,9 +173,14 @@ void BasicTaskScheduler::SingleStep(unsigned maxDelayTime)
         while ((handler = iter.next()) != NULL) {
             int sock = handler->socketNum; // alias
             int resultConditionSet = 0;
-            if (FD_ISSET(sock, &readSet) && FD_ISSET(sock, &fReadSet)/*sanity check*/) resultConditionSet |= SOCKET_READABLE;
-            if (FD_ISSET(sock, &writeSet) && FD_ISSET(sock, &fWriteSet)/*sanity check*/) resultConditionSet |= SOCKET_WRITABLE;
-            if (FD_ISSET(sock, &exceptionSet) && FD_ISSET(sock, &fExceptionSet)/*sanity check*/) resultConditionSet |= SOCKET_EXCEPTION;
+            if (FD_ISSET(sock, &readSet) && FD_ISSET(sock, &fReadSet)/*sanity check*/)
+                resultConditionSet |= SOCKET_READABLE;
+
+            if (FD_ISSET(sock, &writeSet) && FD_ISSET(sock, &fWriteSet)/*sanity check*/)
+                resultConditionSet |= SOCKET_WRITABLE;
+
+            if (FD_ISSET(sock, &exceptionSet) && FD_ISSET(sock, &fExceptionSet)/*sanity check*/)
+                resultConditionSet |= SOCKET_EXCEPTION;
             if ((resultConditionSet & handler->conditionSet) != 0 && handler->handlerProc != NULL) {
                 fLastHandledSocketNum = sock;
                 // Note: we set "fLastHandledSocketNum" before calling the handler,
@@ -173,7 +189,8 @@ void BasicTaskScheduler::SingleStep(unsigned maxDelayTime)
                 break;
             }
         }
-        if (handler == NULL) fLastHandledSocketNum = -1;//because we didn't call a handler
+        if (handler == NULL)
+            fLastHandledSocketNum = -1;//because we didn't call a handler
     }
 
     // Also handle any newly-triggered event (Note that we do this *after* calling a socket handler,
@@ -186,7 +203,8 @@ void BasicTaskScheduler::SingleStep(unsigned maxDelayTime)
         do {
             i = (i + 1) % MAX_NUM_EVENT_TRIGGERS;
             mask >>= 1;
-            if (mask == 0) mask = EVENT_TRIGGER_ID_HIGH_BIT;
+            if (mask == 0)
+                mask = EVENT_TRIGGER_ID_HIGH_BIT;
 
 #ifndef NO_STD_LIB
             if (fTriggersAwaitingHandling[i].test()) {
@@ -209,6 +227,7 @@ void BasicTaskScheduler::SingleStep(unsigned maxDelayTime)
     // Also handle any delayed event that may have come due.
     fDelayQueue.handleAlarm();
 }
+
 
 void BasicTaskScheduler
 ::setBackgroundHandling(int socketNum, int conditionSet, BackgroundHandlerProc * handlerProc, void* clientData)

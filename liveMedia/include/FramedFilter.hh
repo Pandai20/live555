@@ -1,4 +1,4 @@
-/**********
+﻿/**********
 This library is free software; you can redistribute it and/or modify it under
 the terms of the GNU Lesser General Public License as published by the
 Free Software Foundation; either version 3 of the License, or (at your
@@ -25,28 +25,28 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include "FramedSource.hh"
 #endif
 
-class FramedFilter: public FramedSource {
+class FramedFilter : public FramedSource {
 public:
-  FramedSource* inputSource() const { return fInputSource; }
+    FramedSource* inputSource() const { return fInputSource; }
 
-  void reassignInputSource(FramedSource* newInputSource) { fInputSource = newInputSource; }
+    void reassignInputSource(FramedSource* newInputSource) { fInputSource = newInputSource; }
 
-  // Call before destruction if you want to prevent the destructor from closing the input source
-  void detachInputSource();
-
-protected:
-  FramedFilter(UsageEnvironment& env, FramedSource* inputSource);
-	 // abstract base class
-  virtual ~FramedFilter();
+    // Call before destruction if you want to prevent the destructor from closing the input source
+    void detachInputSource();
 
 protected:
-  // Redefined virtual functions (with default 'null' implementations):
-  virtual char const* MIMEtype() const;
-  virtual void getAttributes() const;
-  virtual void doStopGettingFrames();
+    FramedFilter(UsageEnvironment& env, FramedSource* inputSource);
+    // abstract base class
+    virtual ~FramedFilter();
 
 protected:
-  FramedSource* fInputSource;
+    // Redefined virtual functions (with default 'null' implementations):
+    virtual char const* MIMEtype() const;
+    virtual void getAttributes() const;
+    virtual void doStopGettingFrames();
+
+protected:
+    FramedSource* fInputSource;
 };
 
 #endif
